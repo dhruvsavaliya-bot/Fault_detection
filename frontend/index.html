@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaultSense — Dashboard</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <span class="logo-text">FaultSense</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="index.html"    class="nav-link active"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+      <a href="sensors.html"  class="nav-link"><span class="nav-icon">📡</span><span class="nav-text">Sensors</span></a>
+      <a href="faults.html"   class="nav-link"><span class="nav-icon">⚠️</span><span class="nav-text">Faults</span></a>
+      <a href="alerts.html"   class="nav-link"><span class="nav-icon">🔔</span><span class="nav-text">Alerts</span> <span class="badge" id="alert-badge">0</span></a>
+      <a href="reports.html"  class="nav-link"><span class="nav-icon">📊</span><span class="nav-text">Reports</span></a>
+      <a href="settings.html" class="nav-link"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+    </nav>
+
+    <div class="sidebar-widget">
+      <div class="widget-header">
+        <span>Quick Views</span>
+      </div>
+      <div class="sidebar-widget-buttons">
+        <button type="button" class="sidebar-btn" onclick="showDashboardPanel('trend', this)">Trend</button>
+        <button type="button" class="sidebar-btn" onclick="showDashboardPanel('severity', this)">Severity</button>
+        <button type="button" class="sidebar-btn" onclick="showDashboardPanel('feed', this)">Live Feed</button>
+      </div>
+      <div class="widget-subtitle">Fault Trend (7 days)</div>
+      <canvas id="sidebar-trend-chart" height="160"></canvas>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info" id="user-info">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div>
+          <div class="user-name" id="user-name">User</div>
+          <div class="user-role" id="user-role">operator</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <h1 class="page-title">Dashboard</h1>
+      <div class="topbar-right">
+        <div class="live-indicator" id="live-dot"> Live</div>
+        <div class="clock" id="clock"></div>
+      </div>
+    </header>
+
+    <!-- KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card" id="kpi-sensors">
+        <div class="kpi-icon">📡</div>
+        <div class="kpi-value" id="kpi-sensors-val">—</div>
+        <div class="kpi-label">Active Sensors</div>
+        <div class="kpi-trend">Monitoring</div>
+      </div>
+      <div class="kpi-card fault" id="kpi-faults">
+        <div class="kpi-icon">⚠️</div>
+        <div class="kpi-value" id="kpi-faults-val">—</div>
+        <div class="kpi-label">Open Faults</div>
+        <div class="kpi-trend" id="kpi-faults-trend">—</div>
+      </div>
+      <div class="kpi-card critical" id="kpi-critical">
+        <div class="kpi-icon">🚨</div>
+        <div class="kpi-value" id="kpi-critical-val">—</div>
+        <div class="kpi-label">Critical</div>
+        <div class="kpi-trend">Needs attention</div>
+      </div>
+      <div class="kpi-card alert" id="kpi-alerts">
+        <div class="kpi-icon">🔔</div>
+        <div class="kpi-value" id="kpi-alerts-val">—</div>
+        <div class="kpi-label">Unread Alerts</div>
+        <div class="kpi-trend"><a href="alerts.html">View all</a></div>
+      </div>
+    </section>
+
+    <section id="panel-trend" class="section-card hidden">
+      <div class="section-header">
+        <h2>Fault Trend (7 days)</h2>
+        <button class="btn-sm" onclick="refreshCharts()">↻ Refresh</button>
+      </div>
+      <canvas id="trend-chart" height="260"></canvas>
+    </section>
+
+    <section id="panel-severity" class="section-card hidden">
+      <div class="section-header">
+        <h2>By Severity</h2>
+        <button class="btn-sm" onclick="refreshCharts()">↻ Refresh</button>
+      </div>
+      <canvas id="severity-chart" height="260"></canvas>
+    </section>
+
+    <section id="panel-feed" class="section-card hidden">
+      <div class="section-header">
+        <h2>Live Event Feed</h2>
+        <button class="btn-sm" onclick="clearFeed()">Clear</button>
+      </div>
+      <div class="live-feed" id="live-feed">
+        <div class="feed-placeholder">Waiting for events…</div>
+      </div>
+    </section>
+
+    <!-- Recent Faults Table -->
+    <section class="section-card">
+      <div class="section-header">
+        <h2>Recent Faults</h2>
+        <a href="faults.html" class="btn-sm">View All →</a>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table" id="recent-faults-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Sensor</th>
+              <th>Severity</th>
+              <th>Type</th>
+              <th>Value</th>
+              <th>Detected</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="faults-tbody">
+            <tr><td colspan="8" class="loading-row">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Demo Controls -->
+    <section class="section-card demo-panel">
+      <h2>Demo Controls</h2>
+      <p>Inject simulated sensor readings to see the system in action.</p>
+      <button class="btn-primary" onclick="generateDemo()">⚡ Generate Demo Data</button>
+      <span id="demo-msg" class="demo-msg"></span>
+    </section>
+
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/alerts.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

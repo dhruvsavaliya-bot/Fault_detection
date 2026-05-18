@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaultSense — Settings</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><span class="logo-text">FaultSense</span></div>
+    <nav class="sidebar-nav">
+      <a href="../index.html"  class="nav-link"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+      <a href="sensors.html"  class="nav-link"><span class="nav-icon">📡</span><span class="nav-text">Sensors</span></a>
+      <a href="faults.html"   class="nav-link"><span class="nav-icon">⚠️</span><span class="nav-text">Faults</span></a>
+      <a href="alerts.html"   class="nav-link"><span class="nav-icon">🔔</span><span class="nav-text">Alerts</span> <span class="badge" id="alert-badge">0</span></a>
+      <a href="reports.html"  class="nav-link"><span class="nav-icon">📊</span><span class="nav-text">Reports</span></a>
+      <a href="settings.html" class="nav-link active"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar" id="user-avatar">U</div>
+        <div><div class="user-name" id="user-name">User</div><div class="user-role" id="user-role">operator</div></div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <h1 class="page-title">Settings</h1>
+    </header>
+
+    <div class="settings-grid">
+
+      <!-- Profile -->
+      <section class="section-card">
+        <h2>Profile</h2>
+        <div class="settings-avatar-row">
+          <div class="settings-avatar" id="settings-avatar">U</div>
+          <div>
+            <div id="s-username" style="font-weight:600;font-size:1.1rem"></div>
+            <div id="s-email" style="color:var(--text-muted);font-size:.9rem"></div>
+            <div id="s-role" class="badge-role"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Change Password -->
+      <section class="section-card">
+        <h2>Change Password</h2>
+        <form onsubmit="changePassword(event)">
+          <div class="form-group"><label>Current Password</label>
+            <input type="password" id="old-pass" required /></div>
+          <div class="form-group"><label>New Password</label>
+            <input type="password" id="new-pass" required minlength="6" /></div>
+          <div class="form-group"><label>Confirm Password</label>
+            <input type="password" id="conf-pass" required minlength="6" /></div>
+          <button type="submit" class="btn-primary">Update Password</button>
+          <span id="pass-msg" class="inline-msg"></span>
+        </form>
+      </section>
+
+      <!-- Appearance & Notifications removed temporarily -->
+
+      <!-- ML Training -->
+      <section class="section-card full-width">
+        <h2>ML Model Training</h2>
+        <p>Train the anomaly detection model for a specific sensor type using normal operation data.</p>
+        <div class="inline-form">
+          <select id="train-type">
+            <option value="temperature">Temperature</option>
+            <option value="vibration">Vibration</option>
+            <option value="pressure">Pressure</option>
+            <option value="current">Current</option>
+            <option value="voltage">Voltage</option>
+            <option value="humidity">Humidity</option>
+          </select>
+          <input type="number" id="train-count" placeholder="Sample count (20+)" min="20" value="100" />
+          <button class="btn-primary" onclick="trainModel()">🤖 Train Model</button>
+        </div>
+        <div id="train-result" class="train-result"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/alerts.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>

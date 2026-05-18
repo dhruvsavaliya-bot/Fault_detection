@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaultSense — Login</title>
+
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body class="auth-page">
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-icon-lg">⚡</div>
+        <h1>FaultSense</h1>
+        <p>Industrial Fault Detection System</p>
+      </div>
+
+      <!-- Tab Switch -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login"    onclick="switchTab('login')">Login</button>
+        <button class="auth-tab"        id="tab-register" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="login-username" placeholder="Enter username" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-eye">
+            <input type="password" id="login-password" placeholder="Enter password" required />
+            <button type="button" onclick="togglePassword('login-password', this)">👁</button>
+          </div>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="remember-me" />
+          <label for="remember-me">Remember me</label>
+        </div>
+        <button type="submit" class="btn-auth" id="login-btn">Login</button>
+        <div class="auth-error" id="login-error"></div>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="reg-username" placeholder="Choose username" required />
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="Enter email" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6" />
+        </div>
+        <button type="submit" class="btn-auth" id="reg-btn">Create Account</button>
+        <div class="auth-error" id="reg-error"></div>
+      </form>
+
+      <div class="auth-demo-hint">
+        <strong>Demo:</strong> Register any account, then login.
+      </div>
+    </div>
+
+    <!-- Decorative side panel -->
+    <div class="auth-visual">
+      <div class="visual-content">
+        <h2>Real-time Fault Detection</h2>
+        <ul class="feature-list">
+          <li>📡 Monitor multiple sensors</li>
+          <li>🤖 ML anomaly detection</li>
+          <li>🚨 Instant alerts</li>
+          <li>📊 Analytics & reports</li>
+          <li>📁 Export CSV / PDF</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    function switchTab(tab) {
+      document.getElementById("login-form").classList.toggle("hidden", tab !== "login");
+      document.getElementById("register-form").classList.toggle("hidden", tab !== "register");
+      document.getElementById("tab-login").classList.toggle("active", tab === "login");
+      document.getElementById("tab-register").classList.toggle("active", tab === "register");
+    }
+    function togglePassword(id, btn) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === "password" ? "text" : "password";
+    }
+  </script>
+</body>
+</html>

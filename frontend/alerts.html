@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FaultSense — Alerts</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><div class="logo-icon">⚡</div><span class="logo-text">FaultSense</span></div>
+    <nav class="sidebar-nav">
+      <a href="../index.html"  class="nav-link"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
+      <a href="sensors.html"  class="nav-link"><span class="nav-icon">📡</span><span class="nav-text">Sensors</span></a>
+      <a href="faults.html"   class="nav-link"><span class="nav-icon">⚠️</span><span class="nav-text">Faults</span></a>
+      <a href="alerts.html"   class="nav-link active"><span class="nav-icon">🔔</span><span class="nav-text">Alerts</span> <span class="badge" id="alert-badge">0</span></a>
+      <a href="reports.html"  class="nav-link"><span class="nav-icon">📊</span><span class="nav-text">Reports</span></a>
+      <a href="settings.html" class="nav-link"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><div class="user-avatar" id="user-avatar">U</div>
+        <div><div class="user-name" id="user-name">User</div><div class="user-role" id="user-role">operator</div></div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <h1 class="page-title">Alerts</h1>
+      <div class="topbar-right">
+        <button class="btn-sm" onclick="markAllRead()">✓ Mark All Read</button>
+      </div>
+    </header>
+
+    <div class="filter-bar">
+      <select id="filter-alert-severity" onchange="loadAlerts()">
+        <option value="">All Severities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+      </select>
+      <select id="filter-alert-read" onchange="loadAlerts()">
+        <option value="">All</option>
+        <option value="unread">Unread</option>
+        <option value="read">Read</option>
+      </select>
+      <button class="btn-sm" onclick="loadAlerts()">↻ Refresh</button>
+    </div>
+
+    <section class="alerts-list" id="alerts-list">
+      <div class="loading-spinner">Loading alerts…</div>
+    </section>
+  </main>
+
+  <div id="toast-container"></div>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/alerts.js"></script>
+  <script src="js/alerts-page.js"></script>
+</body>
+</html>
