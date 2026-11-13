@@ -31,13 +31,12 @@ function renderAlerts() {
   }
 
   container.innerHTML = filtered.map(alert => {
-    const statusClass = alert.is_read ? "unread" : "";
+    const statusClass = alert.is_read ? "" : "unread";
     return `
       <div class="alert-item ${alert.severity} ${statusClass}">
-        <div class="alert-icon">${alert.severity === "critical" ? "🚨" : alert.severity === "high" ? "⚠️" : "ℹ️"}</div>
         <div class="alert-body">
           <div class="alert-msg">${alert.message}</div>
-          <div class="alert-meta">${formatTimestamp(alert.created_at)} • ${alert.severity.toUpperCase()}</div>
+          <div class="alert-meta"><span class="severity-chip ${alert.severity}">${alert.severity}</span> <span>${formatTimestamp(alert.created_at)}</span></div>
         </div>
         <div class="alert-actions">
           ${alert.is_read ? "" : `<button class="btn-sm" onclick="markAlertRead(${alert.id})">Mark read</button>`}

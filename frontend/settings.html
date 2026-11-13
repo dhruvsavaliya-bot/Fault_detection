@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FaultSense — Settings</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -11,26 +19,29 @@
 </head>
 <body>
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><div class="logo-icon">⚡</div><span class="logo-text">FaultSense</span></div>
+    <div class="sidebar-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2 20 7v10l-8 5-8-5V7z"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/></svg></div>
+      <span class="logo-text">FaultSense</span>
+    </div>
     <nav class="sidebar-nav">
-      <a href="../index.html"  class="nav-link"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
-      <a href="sensors.html"  class="nav-link"><span class="nav-icon">📡</span><span class="nav-text">Sensors</span></a>
-      <a href="faults.html"   class="nav-link"><span class="nav-icon">⚠️</span><span class="nav-text">Faults</span></a>
-      <a href="alerts.html"   class="nav-link"><span class="nav-icon">🔔</span><span class="nav-text">Alerts</span> <span class="badge" id="alert-badge">0</span></a>
-      <a href="reports.html"  class="nav-link"><span class="nav-icon">📊</span><span class="nav-text">Reports</span></a>
-      <a href="settings.html" class="nav-link active"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+      <a href="index.html"    class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg></span><span class="nav-text">Dashboard</span></a>
+      <a href="sensors.html"  class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M7 3v2M12 3v2M17 3v2M7 19v2M12 19v2M17 19v2M3 7h2M3 12h2M3 17h2M19 7h2M19 12h2M19 17h2"/></svg></span><span class="nav-text">Sensors</span></a>
+      <a href="faults.html"   class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg></span><span class="nav-text">Faults</span></a>
+      <a href="alerts.html"   class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></span><span class="nav-text">Alerts</span> <span class="badge" id="alert-badge">0</span></a>
+      <a href="reports.html"  class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span><span class="nav-text">Reports</span></a>
+      <a href="settings.html" class="nav-link active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span><span class="nav-text">Settings</span></a>
     </nav>
     <div class="sidebar-footer">
       <div class="user-info"><div class="user-avatar" id="user-avatar">U</div>
         <div><div class="user-name" id="user-name">User</div><div class="user-role" id="user-role">operator</div></div>
       </div>
-      <button class="btn-logout" onclick="logout()">Logout</button>
+      <button class="btn-logout" onclick="logout()">Log out</button>
     </div>
   </aside>
 
   <main class="main-content">
     <header class="topbar">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <button class="menu-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <h1 class="page-title">Settings</h1>
     </header>
 
@@ -42,35 +53,37 @@
         <div class="settings-avatar-row">
           <div class="settings-avatar" id="settings-avatar">U</div>
           <div>
-            <div id="s-username" style="font-weight:600;font-size:1.1rem"></div>
-            <div id="s-email" style="color:var(--text-muted);font-size:.9rem"></div>
+            <div id="s-username" style="font-weight:600;font-size:1.05rem"></div>
+            <div id="s-email" style="color:var(--text-secondary);font-size:.88rem"></div>
             <div id="s-role" class="badge-role"></div>
           </div>
+        </div>
+        <div id="verify-banner" class="hidden" style="margin-top:1rem;padding:0.75rem 1rem;background:var(--orange-tint);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+          <span style="color:#a05a00;font-size:0.88rem;font-weight:500">Your email isn't verified yet.</span>
+          <button class="btn-sm" onclick="resendVerification(this)">Resend verification email</button>
         </div>
       </section>
 
       <!-- Change Password -->
       <section class="section-card">
-        <h2>Change Password</h2>
+        <h2>Change password</h2>
         <form onsubmit="changePassword(event)">
-          <div class="form-group"><label>Current Password</label>
+          <div class="form-group"><label>Current password</label>
             <input type="password" id="old-pass" required /></div>
-          <div class="form-group"><label>New Password</label>
+          <div class="form-group"><label>New password</label>
             <input type="password" id="new-pass" required minlength="6" /></div>
-          <div class="form-group"><label>Confirm Password</label>
+          <div class="form-group"><label>Confirm password</label>
             <input type="password" id="conf-pass" required minlength="6" /></div>
-          <button type="submit" class="btn-primary">Update Password</button>
+          <button type="submit" class="btn-primary">Update password</button>
           <span id="pass-msg" class="inline-msg"></span>
         </form>
       </section>
 
-      <!-- Appearance & Notifications removed temporarily -->
-
       <!-- ML Training -->
-      <section class="section-card full-width">
-        <h2>ML Model Training</h2>
-        <p>Train the anomaly detection model for a specific sensor type using normal operation data.</p>
-        <div class="inline-form">
+      <section class="section-card full-width" id="training-section">
+        <h2>Anomaly model training</h2>
+        <p>Train the Isolation Forest model for a sensor type on synthetic baseline samples, so it recognizes normal operating range before flagging deviations.</p>
+        <div class="inline-form" id="training-controls">
           <select id="train-type">
             <option value="temperature">Temperature</option>
             <option value="vibration">Vibration</option>
@@ -80,7 +93,7 @@
             <option value="humidity">Humidity</option>
           </select>
           <input type="number" id="train-count" placeholder="Sample count (20+)" min="20" value="100" />
-          <button class="btn-primary" onclick="trainModel()">🤖 Train Model</button>
+          <button class="btn-primary" onclick="trainModel()">Train model</button>
         </div>
         <div id="train-result" class="train-result"></div>
       </section>

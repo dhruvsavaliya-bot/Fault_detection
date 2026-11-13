@@ -7,12 +7,12 @@ import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 import joblib, os, logging
-from datetime import datetime
+from database import utcnow
 from typing import List, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
-MODEL_DIR = os.path.join(os.path.dirname(__file__), "models")
+MODEL_DIR = os.getenv("MODEL_DIR", os.path.join(os.path.dirname(__file__), "models"))
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 THRESHOLDS = {
@@ -47,6 +47,15 @@ class FaultDetector:
         self._load()
 
     # ── Public API ─────────────────────────────────────────────────────────────
+    def seed_history(self, values: List[float]) -> None:
+        """Seed the rolling z-score window from past readings (e.g. loaded
+        from the database) so statistical detection has context immediately
+        after a process restart instead of starting cold. No-op once the
+        detector already has history, so a restart only seeds once."""
+        if self.history or not values:
+            return
+        self.history = list(values)[-1000:]
+
     def train(self, data: List[float]) -> Dict:
         if len(data) < 20:
             return {"success": False, "error": "Need ≥ 20 samples"}
@@ -60,7 +69,7 @@ class FaultDetector:
                 "std":  round(float(np.std(data)),  3)}
 
     def detect(self, value: float, timestamp: Optional[str] = None) -> Dict:
-        ts = timestamp or datetime.utcnow().isoformat()
+        ts = timestamp or utcnow().isoformat()
         self.history.append(value)
         if len(self.history) > 1000:
             self.history = self.history[-1000:]
@@ -120,7 +129,7 @@ class FaultDetector:
             X    = self.scaler.transform([[v]])
             pred = self.model.predict(X)[0]
             score= float(self.model.score_samples(X)[0])
-            anom = pred == -1
+            anom = bool(pred == -1)  # numpy.bool_ isn't JSON-serializable; cast to a native bool
             status = ("critical" if anom and score < -0.3
                       else "high" if anom else "normal")
             return {"status": status, "score": round(score, 4), "anomaly": anom}

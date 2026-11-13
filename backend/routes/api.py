@@ -4,24 +4,49 @@ routes/api.py — Core REST API: sensors, readings, faults, alerts
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from database import db, Sensor, SensorReading, Fault, Alert
+from database import db, Sensor, SensorReading, Fault, Alert, utcnow
 from detector import get_detector
-from datetime import datetime, timedelta
+from extensions import socketio
+from authz import require_role
+from datetime import timedelta
 import random, json
 
 api_bp = Blueprint("api", __name__)
 
 
 # ── Sensors ───────────────────────────────────────────────────────────────────
+def _sensor_status(sensor_id):
+    """Most recent open fault severity for a sensor, or 'critical'/'fault'/'normal'."""
+    open_fault = (Fault.query
+                  .filter_by(sensor_id=sensor_id, status="open")
+                  .order_by(Fault.detected_at.desc())
+                  .first())
+    if not open_fault:
+        return "normal"
+    return "critical" if open_fault.severity == "critical" else "fault"
+
+
+def _sensor_summary(sensor):
+    data = sensor.to_dict()
+    latest = (SensorReading.query
+              .filter_by(sensor_id=sensor.id)
+              .order_by(SensorReading.timestamp.desc())
+              .first())
+    data["latest_value"]     = latest.value if latest else None
+    data["latest_timestamp"] = latest.timestamp.isoformat() if latest else None
+    data["status"]           = _sensor_status(sensor.id)
+    return data
+
+
 @api_bp.route("/sensors", methods=["GET"])
 @jwt_required()
 def list_sensors():
     sensors = Sensor.query.filter_by(is_active=True).all()
-    return jsonify([s.to_dict() for s in sensors]), 200
+    return jsonify([_sensor_summary(s) for s in sensors]), 200
 
 
 @api_bp.route("/sensors", methods=["POST"])
-@jwt_required()
+@require_role("admin", "engineer")
 def create_sensor():
     data   = request.get_json()
     sensor = Sensor(
@@ -39,24 +64,32 @@ def create_sensor():
 @jwt_required()
 def get_sensor(sid):
     sensor = Sensor.query.get_or_404(sid)
-    data   = sensor.to_dict()
-    # attach latest reading
-    latest = (SensorReading.query
-              .filter_by(sensor_id=sid)
-              .order_by(SensorReading.timestamp.desc())
-              .first())
-    data["latest_value"]     = latest.value     if latest else None
-    data["latest_timestamp"] = latest.timestamp.isoformat() if latest else None
+    data   = _sensor_summary(sensor)
+    data["total_readings"] = SensorReading.query.filter_by(sensor_id=sid).count()
+    data["open_faults"]    = Fault.query.filter_by(sensor_id=sid, status="open").count()
     return jsonify(data), 200
 
 
 @api_bp.route("/sensors/<int:sid>", methods=["DELETE"])
-@jwt_required()
+@require_role("admin")
 def delete_sensor(sid):
     sensor            = Sensor.query.get_or_404(sid)
     sensor.is_active  = False
     db.session.commit()
     return jsonify({"message": "Sensor deactivated"}), 200
+
+
+def _seed_detector_history(detector, sensor_type):
+    """On first use after a restart, give the detector's rolling z-score
+    window some real context instead of starting with an empty history."""
+    if detector.history:
+        return
+    recent = (SensorReading.query
+              .join(Sensor, SensorReading.sensor_id == Sensor.id)
+              .filter(Sensor.sensor_type == sensor_type)
+              .order_by(SensorReading.timestamp.desc())
+              .limit(200).all())
+    detector.seed_history([r.value for r in reversed(recent)])
 
 
 # ── Readings + Live Detection ─────────────────────────────────────────────────
@@ -67,6 +100,7 @@ def add_reading(sid):
     data     = request.get_json()
     value    = float(data["value"])
     detector = get_detector(sensor.sensor_type)
+    _seed_detector_history(detector, sensor.sensor_type)
     result   = detector.detect(value)
 
     reading  = SensorReading(
@@ -95,8 +129,12 @@ def add_reading(sid):
             severity = result["severity"],
         )
         db.session.add(alert)
+        db.session.commit()
 
-    db.session.commit()
+        socketio.emit("fault_detected", fault.to_dict())
+    else:
+        db.session.commit()
+
     return jsonify(result), 201
 
 
@@ -117,10 +155,16 @@ def get_readings(sid):
 def list_faults():
     status   = request.args.get("status")
     severity = request.args.get("severity")
-    q        = Fault.query
+    # keep the response a plain array (existing frontend contract) while
+    # letting a caller page through more than the default cap if it needs to
+    limit    = min(1000, max(1, request.args.get("limit", 200, type=int)))
+    offset   = max(0, request.args.get("offset", 0, type=int))
+
+    q = Fault.query
     if status:   q = q.filter_by(status=status)
     if severity: q = q.filter_by(severity=severity)
-    faults   = q.order_by(Fault.detected_at.desc()).limit(200).all()
+    faults = (q.order_by(Fault.detected_at.desc())
+                .offset(offset).limit(limit).all())
     return jsonify([f.to_dict() for f in faults]), 200
 
 
@@ -129,7 +173,7 @@ def list_faults():
 def resolve_fault(fid):
     fault             = Fault.query.get_or_404(fid)
     fault.status      = "resolved"
-    fault.resolved_at = datetime.utcnow()
+    fault.resolved_at = utcnow()
     db.session.commit()
     return jsonify(fault.to_dict()), 200
 
@@ -138,9 +182,11 @@ def resolve_fault(fid):
 @api_bp.route("/alerts", methods=["GET"])
 @jwt_required()
 def list_alerts():
+    limit  = min(500, max(1, request.args.get("limit", 50, type=int)))
+    offset = max(0, request.args.get("offset", 0, type=int))
     alerts = (Alert.query
               .order_by(Alert.created_at.desc())
-              .limit(50).all())
+              .offset(offset).limit(limit).all())
     return jsonify([a.to_dict() for a in alerts]), 200
 
 
@@ -183,7 +229,7 @@ def dashboard_summary():
 
 # ── ML Training ───────────────────────────────────────────────────────────────
 @api_bp.route("/train/<sensor_type>", methods=["POST"])
-@jwt_required()
+@require_role("admin", "engineer")
 def train_model(sensor_type):
     data     = request.get_json()
     detector = get_detector(sensor_type)
@@ -205,10 +251,12 @@ def generate_demo():
         "voltage":     (210, 255),
         "humidity":    (30, 95),
     }
+
     inserted = 0
     for sensor in sensors:
         lo, hi = ranges.get(sensor.sensor_type, (0, 100))
         detector = get_detector(sensor.sensor_type)
+        _seed_detector_history(detector, sensor.sensor_type)
         for _ in range(20):
             v = round(random.uniform(lo, hi), 2)
             # occasionally inject spike
@@ -219,7 +267,7 @@ def generate_demo():
                 sensor_id  = sensor.id,
                 value      = v,
                 is_anomaly = result["is_fault"],
-                timestamp  = datetime.utcnow() - timedelta(
+                timestamp  = utcnow() - timedelta(
                     minutes=random.randint(0, 1440))
             )
             db.session.add(reading)
@@ -242,6 +290,7 @@ def generate_demo():
                     severity = result["severity"],
                 )
                 db.session.add(alert)
+                socketio.emit("fault_detected", fault.to_dict())
             inserted += 1
     db.session.commit()
     return jsonify({"inserted": inserted}), 201

@@ -1,300 +1,73 @@
-/* components.css — Reusable UI components: badges, severity, chips, etc. */
+/* components.css — pills, badges, gauges, empty states */
 
-/* ── Severity Chips ──────────────────────────────────────────────────────── */
+/* ── Severity Pill ───────────────────────────────────────────────────────── */
 .severity-chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  font-size: 0.75rem;
+  display: inline-flex; align-items: center;
+  padding: 3px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  text-transform: capitalize;
 }
 
-.severity-chip.critical {
-  background: rgba(255,71,87,0.15);
-  color: var(--danger);
-  border: 1px solid rgba(255,71,87,0.3);
-}
-.severity-chip.high {
-  background: rgba(255,165,2,0.15);
-  color: var(--warning);
-  border: 1px solid rgba(255,165,2,0.3);
-}
-.severity-chip.medium {
-  background: rgba(168,85,247,0.15);
-  color: var(--purple);
-  border: 1px solid rgba(168,85,247,0.3);
-}
-.severity-chip.low {
-  background: rgba(46,213,115,0.15);
-  color: var(--success);
-  border: 1px solid rgba(46,213,115,0.3);
-}
-.severity-chip.normal {
-  background: rgba(79,142,247,0.15);
-  color: var(--accent);
-  border: 1px solid rgba(79,142,247,0.3);
-}
+.severity-chip.critical { background: var(--red-tint);    color: var(--red); }
+.severity-chip.high     { background: var(--orange-tint); color: var(--orange); }
+.severity-chip.medium   { background: var(--yellow-tint); color: #a67c00; }
+.severity-chip.low      { background: var(--green-tint);  color: var(--green); }
+.severity-chip.normal   { background: var(--blue-tint);   color: var(--blue); }
 
-/* ── Status Chip ─────────────────────────────────────────────────────────── */
+/* ── Status Pill ─────────────────────────────────────────────────────────── */
 .status-chip {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  padding: 3px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
 }
-
-.status-chip.open {
-  background: rgba(255,71,87,0.12);
-  color: var(--danger);
-}
-.status-chip.resolved {
-  background: rgba(46,213,115,0.12);
-  color: var(--success);
-}
-.status-chip.investigating {
-  background: rgba(255,165,2,0.12);
-  color: var(--warning);
-}
+.status-chip.open          { background: var(--red-tint); color: var(--red); }
+.status-chip.resolved      { background: var(--green-tint); color: var(--green); }
+.status-chip.investigating { background: var(--orange-tint); color: var(--orange); }
 
 /* ── Sensor Type Badge ───────────────────────────────────────────────────── */
 .type-badge {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 0.72rem;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
   font-weight: 600;
-  background: rgba(79,142,247,0.1);
-  color: var(--accent);
-  border: 1px solid rgba(79,142,247,0.2);
+  color: var(--blue);
+  background: var(--blue-tint);
 }
 
 /* ── Mini Gauge ──────────────────────────────────────────────────────────── */
-.gauge-bar {
-  height: 6px;
-  background: var(--bg-input);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 0.5rem;
-}
-
-.gauge-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--success);
-  transition: width 0.5s ease, background 0.3s;
-}
-.gauge-fill.warn     { background: var(--warning); }
-.gauge-fill.critical { background: var(--danger); }
+.gauge-bar { height: 5px; background: var(--fill); border-radius: var(--radius-pill); overflow: hidden; margin-top: 0.5rem; }
+.gauge-fill { height: 100%; border-radius: var(--radius-pill); background: var(--green); transition: width 0.6s var(--ease), background 0.3s var(--ease); }
+.gauge-fill.warn     { background: var(--orange); }
+.gauge-fill.critical { background: var(--red); }
 
 /* ── Action Buttons in Table ─────────────────────────────────────────────── */
-.btn-resolve {
-  background: rgba(46,213,115,0.12);
-  color: var(--success);
-  border: 1px solid rgba(46,213,115,0.3);
-  padding: 3px 10px;
-  border-radius: var(--radius-sm);
+.btn-resolve, .btn-view, .btn-delete {
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: background 0.2s;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background 0.15s var(--ease), transform 0.12s var(--ease);
 }
-.btn-resolve:hover { background: rgba(46,213,115,0.24); }
-
-.btn-view {
-  background: rgba(79,142,247,0.12);
-  color: var(--accent);
-  border: 1px solid rgba(79,142,247,0.3);
-  padding: 3px 10px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-.btn-view:hover { background: rgba(79,142,247,0.22); }
-
-.btn-delete {
-  background: rgba(255,71,87,0.12);
-  color: var(--danger);
-  border: 1px solid rgba(255,71,87,0.3);
-  padding: 3px 10px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-.btn-delete:hover { background: rgba(255,71,87,0.24); }
+.btn-resolve:active, .btn-view:active, .btn-delete:active { transform: scale(0.95); }
+.btn-resolve { color: var(--green); background: var(--green-tint); }
+.btn-resolve:hover { background: color-mix(in srgb, var(--green) 24%, transparent); }
+.btn-view { color: var(--blue); background: var(--blue-tint); }
+.btn-view:hover { background: color-mix(in srgb, var(--blue) 24%, transparent); }
+.btn-delete { color: var(--red); background: var(--red-tint); }
+.btn-delete:hover { background: color-mix(in srgb, var(--red) 24%, transparent); }
 
 /* ── Info Row ────────────────────────────────────────────────────────────── */
-.info-row {
-  display: flex; gap: 0.5rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.875rem;
-}
-.info-row .label {
-  color: var(--text-muted);
-  min-width: 120px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
+.info-row { display: flex; gap: 0.5rem; padding: 0.55rem 0; border-bottom: 1px solid var(--line); font-size: 0.88rem; }
+.info-row .label { color: var(--text-secondary); min-width: 120px; font-weight: 600; }
 
 /* ── Empty State ─────────────────────────────────────────────────────────── */
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-muted);
-}
-.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-.empty-state p { font-size: 0.9rem; }
-
-/* ── Auth Card ───────────────────────────────────────────────────────────── */
-.auth-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-
-.auth-container {
-  display: flex;
-  width: 900px; max-width: 95vw;
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-
-.auth-card {
-  background: var(--bg-card);
-  padding: 2.5rem;
-  flex: 1;
-}
-
-.auth-logo { text-align: center; margin-bottom: 2rem; }
-.auth-logo .logo-icon-lg { font-size: 2.5rem; margin-bottom: 0.5rem; }
-.auth-logo h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; }
-.auth-logo p  { font-size: 0.85rem; color: var(--text-muted); }
-
-.auth-tabs {
-  display: flex; gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  background: var(--bg);
-  border-radius: var(--radius-sm);
-  padding: 4px;
-}
-
-.auth-tab {
-  flex: 1;
-  background: none; border: none;
-  padding: 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-.auth-tab.active { background: var(--bg-card); color: var(--text); }
-
-.btn-auth {
-  width: 100%;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 0.65rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-top: 0.5rem;
-}
-.btn-auth:hover { background: var(--accent-hover); }
-
-.auth-error {
-  margin-top: 0.75rem;
-  color: var(--danger);
-  font-size: 0.85rem;
-  text-align: center;
-}
-
-.form-check {
-  display: flex; align-items: center; gap: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-.form-check input { width: auto; }
-
-.input-eye { position: relative; }
-.input-eye input { padding-right: 2.5rem; }
-.input-eye button {
-  position: absolute; right: 0.6rem; top: 50%;
-  transform: translateY(-50%);
-  background: none; border: none;
-  cursor: pointer; color: var(--text-muted); font-size: 0.9rem;
-}
-
-.auth-demo-hint {
-  margin-top: 1.5rem;
-  padding: 0.75rem;
-  background: rgba(79,142,247,0.08);
-  border: 1px solid rgba(79,142,247,0.2);
-  border-radius: var(--radius-sm);
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.auth-visual {
-  background: linear-gradient(135deg, #1a237e, #283593);
-  padding: 2.5rem;
-  display: flex; align-items: center; justify-content: center;
-  min-width: 280px;
-}
-
-.visual-content h2 { color: #fff; margin-bottom: 1.5rem; font-size: 1.25rem; }
-
-.feature-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
-.feature-list li { color: rgba(255,255,255,0.85); font-size: 0.9rem; }
-
-@media (max-width: 680px) {
-  .auth-visual { display: none; }
-}
-
-/* ── Color Mapping Table ─────────────────────────────────────────────────── */
-.color-map-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  padding: 1rem;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
-  margin: 1rem 0;
-}
-.color-map-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-.color-map-table th, .color-map-table td {
-  text-align: left;
-  padding: 8px 10px;
-  border-bottom: 1px dashed var(--border);
-  vertical-align: middle;
-}
-.color-swatch {
-  display: inline-block;
-  width: 28px; height: 18px;
-  border-radius: 4px;
-  margin-right: 8px;
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.06);
-}
-.swatch-critical { background: #D32F2F; }
-.swatch-warning  { background: #F57C00; }
-.swatch-safe     { background: #388E3C; }
-.swatch-neutral  { background: #38BDF8; }
-.swatch-accent   { background: #94A3B8; }
-.color-hex { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; color: var(--text-muted); }
+.empty-state { text-align: center; padding: 3rem; color: var(--text-tertiary); }
+.empty-state .empty-icon { font-size: 1.6rem; margin-bottom: 0.75rem; }
+.empty-state p { font-size: 0.92rem; }

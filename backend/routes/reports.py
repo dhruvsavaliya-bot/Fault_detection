@@ -4,8 +4,8 @@ routes/reports.py — Reports & analytics endpoints
 
 from flask import Blueprint, jsonify, Response, request
 from flask_jwt_extended import jwt_required
-from database import db, Fault, SensorReading, Sensor, Alert
-from datetime import datetime, timedelta
+from database import db, Fault, SensorReading, Sensor, Alert, utcnow
+from datetime import timedelta
 import csv, io
 
 reports_bp = Blueprint("reports", __name__)
@@ -15,7 +15,7 @@ reports_bp = Blueprint("reports", __name__)
 @jwt_required()
 def analytics():
     days = int(request.args.get("days", 7))
-    since = datetime.utcnow() - timedelta(days=days)
+    since = utcnow() - timedelta(days=days)
 
     faults = Fault.query.filter(Fault.detected_at >= since).all()
 
@@ -50,7 +50,7 @@ def analytics():
 @jwt_required()
 def export_csv():
     days  = int(request.args.get("days", 30))
-    since = datetime.utcnow() - timedelta(days=days)
+    since = utcnow() - timedelta(days=days)
     faults= Fault.query.filter(Fault.detected_at >= since).all()
 
     buf = io.StringIO()

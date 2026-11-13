@@ -1,12 +1,18 @@
-flask==3.0.3
-flask-cors==4.0.1
-flask-socketio==5.3.6
+flask==3.1.3
+flask-cors==6.0.5
+flask-socketio==5.7.2
 flask-sqlalchemy==3.1.1
-flask-jwt-extended==4.6.0
-scikit-learn==1.5.1
-numpy==1.26.4
-pandas==2.2.2
-joblib==1.4.2
-python-dotenv==1.0.1
-eventlet==0.36.1
-Werkzeug==3.0.3
+flask-jwt-extended==4.7.4
+flask-limiter==4.1.1
+scikit-learn==1.9.1
+numpy==2.5.4
+pandas==3.1.1
+joblib==1.6.0
+python-dotenv==1.2.4
+Werkzeug==3.1.9
+
+# test dependencies
+pytest==9.2.0
+
+# optional: only needed if RATELIMIT_STORAGE_URI is set to a redis:// URI
+# redis==5.2.1

@@ -28,10 +28,9 @@ function addFeedEntry(msg, severity = "info") {
   const placeholder = feed.querySelector(".feed-placeholder");
   if (placeholder) placeholder.remove();
 
-  const icons = { critical: "🚨", high: "⚠️", medium: "🟡", normal: "✅", info: "ℹ️" };
   const entry = document.createElement("div");
   entry.className = `feed-entry`;
-  entry.textContent = `${icons[severity] || "•"} [${new Date().toLocaleTimeString()}] ${msg}`;
+  entry.textContent = `[${new Date().toLocaleTimeString()}] ${severity.toUpperCase()}  ${msg}`;
   feed.prepend(entry);
   if (feed.children.length > 60) feed.lastChild.remove();
 }
@@ -45,10 +44,10 @@ function clearFeed() {
 async function loadSummary() {
   try {
     const data = await DashboardAPI.summary();
-    document.getElementById("kpi-sensors-val").textContent  = data.total_sensors;
-    document.getElementById("kpi-faults-val").textContent   = data.open_faults;
-    document.getElementById("kpi-critical-val").textContent = data.critical_faults;
-    document.getElementById("kpi-alerts-val").textContent   = data.unread_alerts;
+    animateValue(document.getElementById("kpi-sensors-val"),  data.total_sensors);
+    animateValue(document.getElementById("kpi-faults-val"),   data.open_faults);
+    animateValue(document.getElementById("kpi-critical-val"), data.critical_faults);
+    animateValue(document.getElementById("kpi-alerts-val"),   data.unread_alerts);
 
     const badge = document.getElementById("alert-badge");
     if (badge) badge.textContent = data.unread_alerts;
@@ -82,7 +81,7 @@ function renderFaultsTable(faults) {
   if (!tbody) return;
 
   if (!faults || faults.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="loading-row">No faults detected 🎉</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="loading-row">No faults detected.</td></tr>';
     return;
   }
 
@@ -108,7 +107,7 @@ async function resolveFault(id, btn) {
     btn.disabled = true;
     await FaultAPI.resolve(id);
     btn.closest("tr").classList.add("flash-row");
-    btn.textContent = "Resolved ✓";
+    btn.textContent = "Resolved";
     showToast("Fault resolved", "success");
     setTimeout(loadSummary, 800);
   } catch (err) {
@@ -147,7 +146,7 @@ async function generateDemo() {
   msg.textContent = "Generating…";
   try {
     const data = await DemoAPI.generate();
-    msg.textContent = `✓ ${data.inserted} readings injected`;
+    msg.textContent = `${data.inserted} readings injected`;
     showToast("Demo data generated!", "success");
     addFeedEntry(`Demo: ${data.inserted} readings added`, "info");
     setTimeout(() => { loadSummary(); refreshCharts(); }, 500);
@@ -164,7 +163,7 @@ function initWebSocket() {
     const socket = io("http://localhost:5000");
     socket.on("fault_detected", (fault) => {
       addFeedEntry(`Fault on sensor ${fault.sensor_id}: ${fault.severity}`, fault.severity);
-      showToast(`⚠️ ${fault.severity.toUpperCase()} fault detected!`, "warning");
+      showToast(`${fault.severity.toUpperCase()} fault detected`, "warning");
       loadSummary();
     });
     socket.on("connect",    () => addFeedEntry("Connected to live feed", "info"));

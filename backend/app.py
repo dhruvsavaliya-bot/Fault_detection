@@ -2,17 +2,21 @@
 app.py — Flask entry point for Fault Detection System
 """
 
+import secrets
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from flask_socketio import SocketIO
 from flask_jwt_extended import JWTManager
+from dotenv import load_dotenv
 import os
 import logging
 
 from database import db, init_db
+from extensions import socketio, limiter
 from routes.api import api_bp
 from routes.auth import auth_bp
 from routes.reports import reports_bp
+
+load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,10 +25,31 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-socketio = SocketIO(
-    cors_allowed_origins="*",
-    async_mode="threading"
-)
+
+def _persisted_secret(base_dir, env_var, filename):
+    """Read a secret from the environment, falling back to a locally
+    generated and persisted one (so it's stable across restarts but never
+    a guessable hardcoded constant checked into source control)."""
+    value = os.getenv(env_var)
+    if value:
+        return value
+
+    instance_dir = os.path.join(base_dir, "instance")
+    os.makedirs(instance_dir, exist_ok=True)
+    path = os.path.join(instance_dir, filename)
+
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            return f.read().strip()
+
+    generated = secrets.token_hex(32)
+    with open(path, "w") as f:
+        f.write(generated)
+    logger.warning(
+        f"{env_var} not set — generated and persisted a local secret at "
+        f"{path}. Set {env_var} explicitly for a real deployment."
+    )
+    return generated
 
 
 def create_app():
@@ -35,20 +60,11 @@ def create_app():
     # FRONTEND DIRECTORY
     FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")
 
-    print("Frontend Path:", FRONTEND_DIR)
-
     app = Flask(__name__)
 
     # CONFIG
-    app.config["SECRET_KEY"] = os.getenv(
-        "SECRET_KEY",
-        "fd-secret-key-2024"
-    )
-
-    app.config["JWT_SECRET_KEY"] = os.getenv(
-        "JWT_SECRET",
-        "fd-jwt-secret-2024"
-    )
+    app.config["SECRET_KEY"] = _persisted_secret(BASE_DIR, "SECRET_KEY", "secret.key")
+    app.config["JWT_SECRET_KEY"] = _persisted_secret(BASE_DIR, "JWT_SECRET", "jwt_secret.key")
 
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
         "DATABASE_URL",
@@ -60,12 +76,19 @@ def create_app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 86400
 
     # ENABLE CORS
-    CORS(app, origins="*")
+    CORS(app, origins=os.getenv("CORS_ORIGINS", "*"))
+
+    # Rate-limit storage: in-memory by default (fine for a single process;
+    # each worker would track its own limits independently under gunicorn
+    # with >1 worker). Point RATELIMIT_STORAGE_URI at Redis for anything
+    # beyond single-process local use, e.g. redis://localhost:6379
+    app.config["RATELIMIT_STORAGE_URI"] = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
 
     # INIT EXTENSIONS
     db.init_app(app)
     socketio.init_app(app)
     JWTManager(app)
+    limiter.init_app(app)
 
     # REGISTER BLUEPRINTS
     app.register_blueprint(api_bp, url_prefix="/api")
@@ -129,15 +152,22 @@ def on_disconnect():
 
 if __name__ == "__main__":
 
-    port = int(os.getenv("PORT", 5000))
+    port  = int(os.getenv("PORT", 5000))
+    # Defaults OFF: debug=True exposes Werkzeug's interactive debugger, which
+    # lets anyone who triggers an unhandled exception execute arbitrary code
+    # in the browser. Opt in explicitly for local development.
+    debug = os.getenv("FLASK_DEBUG", "false").lower() in ("1", "true", "yes")
 
     logger.info(
-        f"Server running → http://localhost:{port}"
+        f"Server running → http://localhost:{port} (debug={debug})"
     )
 
     socketio.run(
         app,
         host="0.0.0.0",
         port=port,
-        debug=True
+        debug=debug,
+        use_reloader=False,  # the stat-based reloader can hang when the
+                             # project sits inside a OneDrive/Dropbox-synced
+                             # directory; restart manually after edits.
     )

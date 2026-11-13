@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FaultSense — Faults</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
   <link rel="stylesheet" href="css/components.css" />
@@ -11,48 +19,51 @@
 </head>
 <body>
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo"><div class="logo-icon">⚡</div><span class="logo-text">FaultSense</span></div>
+    <div class="sidebar-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 2 20 7v10l-8 5-8-5V7z"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/></svg></div>
+      <span class="logo-text">FaultSense</span>
+    </div>
     <nav class="sidebar-nav">
-      <a href="../index.html"  class="nav-link"><span class="nav-icon">🏠</span><span class="nav-text">Dashboard</span></a>
-      <a href="sensors.html"  class="nav-link"><span class="nav-icon">📡</span><span class="nav-text">Sensors</span></a>
-      <a href="faults.html"   class="nav-link active"><span class="nav-icon">⚠️</span><span class="nav-text">Faults</span></a>
-      <a href="alerts.html"   class="nav-link"><span class="nav-icon">🔔</span><span class="nav-text">Alerts</span> <span class="badge" id="alert-badge">0</span></a>
-      <a href="reports.html"  class="nav-link"><span class="nav-icon">📊</span><span class="nav-text">Reports</span></a>
-      <a href="settings.html" class="nav-link"><span class="nav-icon">⚙️</span><span class="nav-text">Settings</span></a>
+      <a href="index.html"    class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg></span><span class="nav-text">Dashboard</span></a>
+      <a href="sensors.html"  class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M7 3v2M12 3v2M17 3v2M7 19v2M12 19v2M17 19v2M3 7h2M3 12h2M3 17h2M19 7h2M19 12h2M19 17h2"/></svg></span><span class="nav-text">Sensors</span></a>
+      <a href="faults.html"   class="nav-link active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3 2 20h20z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg></span><span class="nav-text">Faults</span></a>
+      <a href="alerts.html"   class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg></span><span class="nav-text">Alerts</span> <span class="badge" id="alert-badge">0</span></a>
+      <a href="reports.html"  class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span><span class="nav-text">Reports</span></a>
+      <a href="settings.html" class="nav-link"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span><span class="nav-text">Settings</span></a>
     </nav>
     <div class="sidebar-footer">
       <div class="user-info"><div class="user-avatar" id="user-avatar">U</div>
         <div><div class="user-name" id="user-name">User</div><div class="user-role" id="user-role">operator</div></div>
       </div>
-      <button class="btn-logout" onclick="logout()">Logout</button>
+      <button class="btn-logout" onclick="logout()">Log out</button>
     </div>
   </aside>
 
   <main class="main-content">
     <header class="topbar">
-      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <button class="menu-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
       <h1 class="page-title">Faults</h1>
       <div class="topbar-right">
-        <button class="btn-sm" onclick="exportFaults()">⬇ Export CSV</button>
+        <button class="btn-sm" onclick="exportFaults()">Export CSV</button>
       </div>
     </header>
 
     <!-- Filters -->
     <div class="filter-bar">
       <select id="filter-severity" onchange="loadFaults()">
-        <option value="">All Severities</option>
+        <option value="">All severities</option>
         <option value="critical">Critical</option>
         <option value="high">High</option>
         <option value="medium">Medium</option>
         <option value="low">Low</option>
       </select>
       <select id="filter-status" onchange="loadFaults()">
-        <option value="">All Status</option>
+        <option value="">All status</option>
         <option value="open">Open</option>
         <option value="resolved">Resolved</option>
       </select>
       <input type="text" id="filter-search" placeholder="Search faults…" oninput="filterTable()" />
-      <button class="btn-sm" onclick="loadFaults()">↻ Refresh</button>
+      <button class="btn-sm" onclick="loadFaults()">Refresh</button>
     </div>
 
     <!-- Faults Table -->
@@ -61,13 +72,13 @@
         <table class="data-table" id="faults-table">
           <thead>
             <tr>
-              <th onclick="sortTable(0)">ID ↕</th>
-              <th onclick="sortTable(1)">Sensor ↕</th>
-              <th onclick="sortTable(2)">Severity ↕</th>
+              <th onclick="sortTable(0)">ID</th>
+              <th onclick="sortTable(1)">Sensor</th>
+              <th onclick="sortTable(2)">Severity</th>
               <th>Type</th>
               <th>Value</th>
               <th>Description</th>
-              <th onclick="sortTable(6)">Detected ↕</th>
+              <th onclick="sortTable(6)">Detected</th>
               <th>Status</th>
               <th>Action</th>
             </tr>

@@ -149,8 +149,18 @@ async function loadFaults() {
 }
 
 function exportFaults() {
-  const url = ReportsAPI.exportFaults();
-  window.location.href = url;
+  ReportsAPI.exportFaults(30).then(({ blob, filename }) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }).catch(err => {
+    showToast(err.message || "Unable to export faults", "error");
+  });
 }
 
 window.loadFaults = loadFaults;

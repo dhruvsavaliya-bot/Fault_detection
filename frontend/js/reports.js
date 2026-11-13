@@ -5,9 +5,9 @@ async function loadAnalytics() {
   try {
     const data = await ReportsAPI.analytics(days);
 
-    document.getElementById("r-total").textContent    = data.total_faults ?? "—";
-    document.getElementById("r-critical").textContent = data.by_severity?.critical ?? 0;
-    document.getElementById("r-high").textContent     = data.by_severity?.high ?? 0;
+    animateValue(document.getElementById("r-total"),    data.total_faults ?? 0);
+    animateValue(document.getElementById("r-critical"), data.by_severity?.critical ?? 0);
+    animateValue(document.getElementById("r-high"),     data.by_severity?.high ?? 0);
     document.getElementById("r-rate").textContent     = `${data.resolution_rate ?? 0}%`;
 
     // Trend (by day) — sort keys chronologically if possible

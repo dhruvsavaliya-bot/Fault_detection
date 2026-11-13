@@ -59,6 +59,9 @@ const AuthAPI = {
   register:       (data)   => apiFetch("/auth/register",{ method: "POST", body: JSON.stringify(data) }),
   me:             ()       => apiFetch("/auth/me"),
   changePassword: (o, n)   => apiFetch("/auth/change-password", { method: "PUT", body: JSON.stringify({ old_password: o, new_password: n }) }),
+  forgotPassword: (email)  => apiFetch("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) }),
+  resetPassword:  (token, newPassword) => apiFetch("/auth/reset-password", { method: "POST", body: JSON.stringify({ token, new_password: newPassword }) }),
+  resendVerification: ()  => apiFetch("/auth/resend-verification", { method: "POST" }),
 };
 
 // ── Sensors ───────────────────────────────────────────────────────────────────

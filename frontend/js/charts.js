@@ -1,30 +1,58 @@
 /* charts.js — Chart.js rendering helpers for dashboard & reports */
 
 const CHART_COLORS = {
-  accent:   "#4f8ef7",
-  danger:   "#ff4757",
-  warning:  "#ffa502",
-  success:  "#2ed573",
-  purple:   "#a855f7",
-  muted:    "rgba(139,144,168,0.3)",
+  accent:   "#0071e3",
+  violet:   "#5e5ce6",
+  danger:   "#ff3b30",
+  warning:  "#ff9500",
+  success:  "#30b953",
+  purple:   "#af52de",
+  muted:    "rgba(110,110,115,0.3)",
 };
+
+// Vertical gradient fill under a line, from an opaque-ish top to transparent bottom.
+function makeAreaGradient(ctx, topColor, bottomColor = "rgba(255,255,255,0)") {
+  const { chartArea } = ctx.chart;
+  if (!chartArea) return topColor; // first layout pass, before area is known
+  const g = ctx.chart.ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+  g.addColorStop(0, topColor);
+  g.addColorStop(1, bottomColor);
+  return g;
+}
+
+// Diagonal gradient stroke — the brand blue-to-violet signature, used on primary trend lines.
+function makeLineGradient(ctx) {
+  const { chartArea } = ctx.chart;
+  if (!chartArea) return CHART_COLORS.accent;
+  const g = ctx.chart.ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+  g.addColorStop(0, CHART_COLORS.accent);
+  g.addColorStop(1, CHART_COLORS.violet);
+  return g;
+}
 
 const CHART_DEFAULTS = {
   responsive: true,
   maintainAspectRatio: false,
+  animation: { duration: 900, easing: "easeOutQuart" },
   plugins: {
-    legend: { labels: { color: "#8b90a8", font: { size: 12 } } },
+    legend: { labels: { color: "#6e6e73", font: { family: "'Inter', -apple-system, sans-serif", size: 12 } } },
     tooltip: {
-      backgroundColor: "#1a1d27",
-      borderColor: "#2a2d3e",
-      borderWidth: 1,
-      titleColor: "#e8eaf0",
-      bodyColor: "#8b90a8",
+      backgroundColor: "rgba(29,29,31,0.92)",
+      borderColor: "transparent",
+      borderWidth: 0,
+      titleColor: "#fff",
+      titleFont: { family: "'Inter', -apple-system, sans-serif", weight: "600" },
+      bodyColor: "rgba(255,255,255,0.85)",
+      bodyFont: { family: "'Inter', -apple-system, sans-serif" },
+      padding: 11,
+      cornerRadius: 10,
+      displayColors: true,
+      boxPadding: 4,
     },
   },
   scales: {
-    x: { ticks: { color: "#8b90a8" }, grid: { color: "rgba(42,45,62,0.08)" } },
-    y: { ticks: { color: "#8b90a8" }, grid: { color: "rgba(42,45,62,0.08)" }, beginAtZero: true },
+    x: { ticks: { color: "#86868b" }, grid: { color: "rgba(0,0,0,0.05)" } },
+    y: { ticks: { color: "#86868b" }, grid: { color: "rgba(0,0,0,0.05)" }, beginAtZero: true },
   },
 };
 
@@ -54,12 +82,18 @@ function renderTrendChart(canvasId, labels, values) {
       datasets: [{
         label: "Faults",
         data: nums,
-        borderColor: CHART_COLORS.accent,
-        backgroundColor: "rgba(79,142,247,0.12)",
+        borderColor: (c) => makeLineGradient(c),
+        backgroundColor: (c) => makeAreaGradient(c, "rgba(0,113,227,0.22)"),
         tension: 0.4,
         fill: true,
+        borderWidth: 2.75,
+        borderCapStyle: "round",
+        borderJoinStyle: "round",
         pointBackgroundColor: CHART_COLORS.accent,
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
         pointRadius: 4,
+        pointHoverRadius: 6,
       }],
     },
     options: { ...CHART_DEFAULTS, scales: { ...CHART_DEFAULTS.scales, y: { ...CHART_DEFAULTS.scales.y, beginAtZero: true } } },
@@ -89,17 +123,21 @@ function renderSeverityChart(canvasId, data) {
       datasets: [{
         data: values,
         backgroundColor: colors,
-        borderColor: "#1a1d27",
+        borderColor: "#ffffff",
         borderWidth: 3,
+        hoverOffset: 10,
+        borderRadius: 4,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      cutout: "68%",
+      animation: { duration: 900, easing: "easeOutQuart" },
       plugins: {
         legend: {
           position: "right",
-          labels: { color: "#8b90a8", font: { size: 12 }, padding: 12 },
+          labels: { color: "#6e6e73", font: { family: "'Inter', -apple-system, sans-serif", size: 12 }, padding: 12 },
         },
         tooltip: CHART_DEFAULTS.plugins.tooltip,
       },
@@ -127,10 +165,10 @@ function renderBarChart(canvasId, labels, values, label = "Count", color = CHART
       datasets: [{
         label,
         data: nums,
-        backgroundColor: color + "cc",
-        borderColor: color,
-        borderWidth: 1,
-        borderRadius: 6,
+        backgroundColor: (c) => makeAreaGradient(c, color, color + "cc"),
+        borderRadius: 8,
+        maxBarThickness: 36,
+        hoverBackgroundColor: color,
       }],
     },
     options: { ...CHART_DEFAULTS, scales: { ...CHART_DEFAULTS.scales, y: { ...CHART_DEFAULTS.scales.y, beginAtZero: true } } },
@@ -146,7 +184,6 @@ function renderMiniChart(canvasId, readings) {
 
   const labels = readings.map(r => new Date(r.timestamp).toLocaleTimeString());
   const values = readings.map(r => r.value);
-  const isAnomaly = readings.map(r => r.is_anomaly);
 
   new Chart(ctx, {
     type: "line",
@@ -156,12 +193,15 @@ function renderMiniChart(canvasId, readings) {
         {
           label: "Value",
           data: values,
-          borderColor: CHART_COLORS.accent,
-          backgroundColor: "rgba(79,142,247,0.08)",
-          tension: 0.3,
+          borderColor: (c) => makeLineGradient(c),
+          backgroundColor: (c) => makeAreaGradient(c, "rgba(0,113,227,0.18)"),
+          tension: 0.35,
           fill: true,
+          borderWidth: 2.5,
           pointBackgroundColor: readings.map(r =>
             r.is_anomaly ? CHART_COLORS.danger : CHART_COLORS.accent),
+          pointBorderColor: "#fff",
+          pointBorderWidth: 1.5,
           pointRadius: readings.map(r => r.is_anomaly ? 6 : 3),
         },
       ],

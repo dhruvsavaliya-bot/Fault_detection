@@ -18,20 +18,21 @@ async function loadSensors() {
 }
 
 function renderSensorCard(s) {
+  const cardClass = s.status === 'fault' ? 'sensor-card fault-state' : s.status === 'critical' ? 'sensor-card critical-state' : 'sensor-card';
   const statusDot = s.status === 'fault' ? 'sensor-status-dot fault' : s.status === 'critical' ? 'sensor-status-dot critical' : 'sensor-status-dot';
   return `
-    <div class="sensor-card" data-id="${s.id}" onclick="openDetailModal(${s.id})">
+    <div class="${cardClass}" data-id="${s.id}" onclick="openDetailModal(${s.id})">
       <div class="sensor-header">
         <div>
           <div class="sensor-name">${escapeHtml(s.name || 'Unnamed')}</div>
-          <div class="sensor-type">${escapeHtml(s.type || '')}</div>
+          <div class="sensor-type">${escapeHtml(s.sensor_type || '')}</div>
         </div>
         <div>
           <div class="sensor-status"> <span class="${statusDot}"></span></div>
         </div>
       </div>
-      <div class="sensor-value-big">${s.last_value ?? '—'} ${escapeHtml(s.unit || '')}</div>
-      <div class="sensor-footer"><div class="sensor-loc">${escapeHtml(s.location || '')}</div><div>id:${s.id}</div></div>
+      <div class="sensor-value-big">${s.latest_value ?? '—'} ${escapeHtml(s.unit || '')}</div>
+      <div class="sensor-footer"><div class="sensor-loc">${escapeHtml(s.location || '')}</div><div>id ${s.id}</div></div>
     </div>`;
 }
 
@@ -68,17 +69,25 @@ async function addSensor(evt) {
   }
 }
 
+let currentSensorId = null;
+
 async function openDetailModal(id) {
   try {
     const data = await SensorAPI.get(id);
+    currentSensorId = id;
     document.getElementById('modal-sensor-name').textContent = data.name || `Sensor ${id}`;
     // populate KPIs
     const kpis = document.getElementById('modal-kpis');
     if (kpis) kpis.innerHTML = `
-      <div class="modal-kpi"><div class="modal-kpi-val">${data.last_value ?? '—'}</div><div class="modal-kpi-label">Last Value</div></div>
+      <div class="modal-kpi"><div class="modal-kpi-val">${data.latest_value ?? '—'}</div><div class="modal-kpi-label">Last value</div></div>
       <div class="modal-kpi"><div class="modal-kpi-val">${data.total_readings ?? 0}</div><div class="modal-kpi-label">Readings</div></div>
-      <div class="modal-kpi"><div class="modal-kpi-val">${data.faults ?? 0}</div><div class="modal-kpi-label">Faults</div></div>`;
+      <div class="modal-kpi"><div class="modal-kpi-val">${data.open_faults ?? 0}</div><div class="modal-kpi-label">Open faults</div></div>`;
+    document.getElementById('reading-result').textContent = '';
     document.getElementById('detail-modal').classList.remove('hidden');
+    try {
+      const readings = await SensorAPI.readings(id, 50);
+      renderMiniChart('sensor-chart', readings);
+    } catch { /* chart is a bonus, don't block the modal on it */ }
   } catch (err) {
     showToast(err.message || 'Failed to load sensor', 'error');
   }
@@ -89,16 +98,13 @@ async function submitReading() {
   if (!valEl) return;
   const val = parseFloat(valEl.value);
   if (isNaN(val)) { showToast('Invalid reading value', 'error'); return; }
-  // find current sensor id from modal title (we stored it earlier?)
-  const title = document.getElementById('modal-sensor-name').textContent || '';
-  const match = title.match(/(\d+)$/);
-  const id = match ? Number(match[1]) : null;
-  if (!id) { showToast('Unknown sensor', 'error'); return; }
+  if (!currentSensorId) { showToast('Unknown sensor', 'error'); return; }
   try {
-    await SensorAPI.addReading(id, val);
-    document.getElementById('reading-result').textContent = 'Reading submitted ✓';
+    await SensorAPI.addReading(currentSensorId, val);
+    document.getElementById('reading-result').textContent = 'Reading submitted';
     showToast('Reading submitted', 'success');
     valEl.value = '';
+    openDetailModal(currentSensorId);
   } catch (err) {
     showToast(err.message || 'Failed to submit reading', 'error');
   }
@@ -113,5 +119,12 @@ window.openDetailModal = openDetailModal;
 window.submitReading = submitReading;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Adding sensors is an admin/engineer action (see backend/authz.py) —
+  // hide the control for operators rather than let them hit a 403.
+  const user = typeof getUser === 'function' ? getUser() : null;
+  if (user && user.role === 'operator') {
+    const addBtn = document.querySelector('button[onclick="openAddModal()"]');
+    if (addBtn) addBtn.remove();
+  }
   loadSensors();
 });
